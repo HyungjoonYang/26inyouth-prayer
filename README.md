@@ -1,19 +1,25 @@
-# 26청년부 기도함
+# 인유스 기도함
 
-교회 청년부가 서로의 기도제목을 나누고, 함께 기도할 수 있는 웹앱.
+교회 청년부(인유스)가 서로의 기도제목을 나누고, 함께 기도할 수 있는 웹앱.
 
-## 셋업
+**https://inyouth-prayer.web.app**
+
+## 기술 스택
+
+- **프론트엔드**: React 19 + Vite + Tailwind CSS v4
+- **백엔드**: Firebase Firestore (실시간 구독)
+- **배포**: Firebase Hosting + GitHub Actions CI/CD
+
+## 로컬 개발
 
 ```bash
 npm install
+npm run dev
 ```
 
-### Firebase 설정
+### 환경 변수
 
-1. [Firebase Console](https://console.firebase.google.com)에서 프로젝트 생성
-2. Firestore Database 활성화 (테스트 모드)
-3. 프로젝트 설정 > 일반 > 웹 앱 추가 > Firebase SDK config 복사
-4. `.env` 파일 생성:
+`.env` 파일을 프로젝트 루트에 생성:
 
 ```
 VITE_FIREBASE_API_KEY=your-api-key
@@ -24,17 +30,8 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 VITE_FIREBASE_APP_ID=your-app-id
 ```
 
-## 개발
-
-```bash
-npm run dev
-```
-
 ## 배포
 
-```bash
-npm install -g firebase-tools
-firebase login
-firebase init hosting  # public: dist, SPA: yes
-npm run deploy
-```
+- **자동 배포**: master 브랜치에 merge 시 GitHub Actions가 Firebase Hosting에 배포
+- **PR 프리뷰**: PR 생성 시 프리뷰 URL 자동 생성
+- **수동 배포**: `npm run deploy`
