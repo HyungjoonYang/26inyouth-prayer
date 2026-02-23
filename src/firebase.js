@@ -21,20 +21,44 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
+let app
+let db
+let prayersRef
+let initError = null
 
-const prayersRef = collection(db, 'prayers')
+try {
+  app = initializeApp(firebaseConfig)
+  db = getFirestore(app)
+  prayersRef = collection(db, 'prayers')
+} catch (err) {
+  initError = err
+  console.error('Firebase 초기화 실패:', err)
+}
 
-export function subscribeToPrayers(callback) {
+export function getInitError() {
+  return initError
+}
+
+export function subscribeToPrayers(callback, onError) {
+  if (initError) {
+    onError?.(initError)
+    return () => {}
+  }
   const q = query(prayersRef, orderBy('createdAt', 'desc'))
-  return onSnapshot(q, (snapshot) => {
-    const prayers = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
-    callback(prayers)
-  })
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const prayers = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      callback(prayers)
+    },
+    (err) => {
+      console.error('Firestore 구독 에러:', err)
+      onError?.(err)
+    },
+  )
 }
 
 export async function addPrayer({ name, content, color }) {

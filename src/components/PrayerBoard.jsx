@@ -1,18 +1,37 @@
 import { useState, useEffect } from 'react'
-import { subscribeToPrayers } from '../firebase'
+import { subscribeToPrayers, getInitError } from '../firebase'
 import PrayerCard from './PrayerCard'
 
 export default function PrayerBoard() {
   const [prayers, setPrayers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(getInitError)
 
   useEffect(() => {
-    const unsubscribe = subscribeToPrayers((data) => {
-      setPrayers(data)
-      setLoading(false)
-    })
+    if (error) return
+    const unsubscribe = subscribeToPrayers(
+      (data) => {
+        setPrayers(data)
+        setLoading(false)
+      },
+      (err) => {
+        setError(err)
+        setLoading(false)
+      },
+    )
     return unsubscribe
-  }, [])
+  }, [error])
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-red-400 text-sm px-4 text-center">
+        <div>
+          <p className="font-semibold mb-1">Firebase 연결 오류</p>
+          <p className="text-xs text-red-300">{error.message || String(error)}</p>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
