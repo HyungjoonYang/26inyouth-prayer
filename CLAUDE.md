@@ -33,12 +33,44 @@ src/
 - 폰트: Pretendard Variable (CDN)
 - 환경 변수: `VITE_FIREBASE_*` prefix (`import.meta.env`로 접근)
 
+## 개발 워크플로우 (TDD)
+
+모든 개발은 Test-Driven Development로 진행한다. 아래 흐름을 반드시 따른다.
+
+### 1. Test 생성
+- 기능 구현 전에 해당 task에 대한 테스트를 먼저 작성
+- 테스트 파일 위치: `src/__tests__/` 또는 대상 파일과 같은 디렉토리에 `*.test.{js,jsx}` 생성
+- 테스트가 실패(RED)하는 것을 확인한 후 다음 단계로
+
+### 2. 기능 구현
+- 테스트를 통과시키기 위한 최소한의 코드 작성
+- 과도한 설계 금지 — 테스트가 요구하는 만큼만 구현
+
+### 3. Test 검증
+- `npm run test`로 해당 테스트가 통과(GREEN)하는지 확인
+- 실패 시 구현 코드 수정 (최대 3회 재시도 후 보고)
+
+### 4. 정리
+- 임시 스크립트, 불필요한 디버깅 코드 삭제
+- `npm run lint`로 린트 점검
+- `npm run build`로 빌드 정상 확인
+
+### 5. 전체 테스트 통과
+- `npm run test`로 전체 unit test suite 통과 확인
+- 기존 테스트가 깨지지 않았는지 반드시 검증
+
+### 테스트 컨벤션
+- 테스트 러너: Vitest + React Testing Library
+- 파일 네이밍: `{ComponentName}.test.jsx` 또는 `{moduleName}.test.js`
+- 테스트 구조: `describe` → `it`/`test`, AAA 패턴 (Arrange-Act-Assert)
+
 ## 개발 명령어
 
 ```bash
 npm run dev       # 로컬 개발 서버
 npm run build     # 프로덕션 빌드 (dist/)
 npm run lint      # ESLint
+npm run test      # Vitest 전체 테스트 실행
 npm run deploy    # 빌드 + Firebase 배포
 ```
 
