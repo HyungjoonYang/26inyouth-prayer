@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { addPrayer } from '../firebase'
+import { useState, useEffect } from 'react'
+import { addPrayer, updatePrayer } from '../firebase'
+import { getDeviceId } from '../utils/deviceId'
 
 const COLORS = [
   { key: 'pink', bg: 'bg-pastel-pink', label: '🩷' },
@@ -9,11 +10,27 @@ const COLORS = [
   { key: 'blue', bg: 'bg-pastel-blue', label: '💙' },
 ]
 
-export default function PrayerForm({ open, onClose }) {
+export default function PrayerForm({ open, onClose, editingPrayer }) {
   const [name, setName] = useState('')
   const [content, setContent] = useState('')
   const [color, setColor] = useState('yellow')
   const [submitting, setSubmitting] = useState(false)
+
+  const isEditing = !!editingPrayer
+
+  useEffect(() => {
+    if (editingPrayer) {
+      setName(editingPrayer.name || '')
+      setContent(editingPrayer.content || '')
+      setColor(editingPrayer.color || 'yellow')
+    }
+  }, [editingPrayer])
+
+  function resetForm() {
+    setName('')
+    setContent('')
+    setColor('yellow')
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -21,13 +38,24 @@ export default function PrayerForm({ open, onClose }) {
 
     setSubmitting(true)
     try {
-      await addPrayer({ name: name.trim(), content: content.trim(), color })
-      setName('')
-      setContent('')
-      setColor('yellow')
+      if (isEditing) {
+        await updatePrayer(editingPrayer.id, {
+          name: name.trim(),
+          content: content.trim(),
+          color,
+        })
+      } else {
+        await addPrayer({
+          name: name.trim(),
+          content: content.trim(),
+          color,
+          deviceId: getDeviceId(),
+        })
+      }
+      resetForm()
       onClose()
     } catch (err) {
-      console.error('Failed to add prayer:', err)
+      console.error('Failed to save prayer:', err)
     } finally {
       setSubmitting(false)
     }
@@ -49,7 +77,9 @@ export default function PrayerForm({ open, onClose }) {
           {/* Handle bar */}
           <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
 
-          <h2 className="text-lg font-bold text-gray-800 mb-4">기도제목 쓰기</h2>
+          <h2 className="text-lg font-bold text-gray-800 mb-4">
+            {isEditing ? '기도제목 수정' : '기도제목 쓰기'}
+          </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -109,7 +139,9 @@ export default function PrayerForm({ open, onClose }) {
               disabled={!content.trim() || submitting}
               className="w-full py-3 rounded-2xl bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-white font-bold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              {submitting ? '올리는 중...' : '올리기 🙏'}
+              {submitting
+                ? (isEditing ? '수정하는 중...' : '올리는 중...')
+                : (isEditing ? '수정하기' : '올리기 🙏')}
             </button>
           </form>
         </div>
