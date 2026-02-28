@@ -5,11 +5,22 @@ import PrayerForm from './components/PrayerForm'
 
 export default function App() {
   const [formOpen, setFormOpen] = useState(false)
+  const [editingPrayer, setEditingPrayer] = useState(null)
+
+  function handleEdit(prayer) {
+    setEditingPrayer(prayer)
+    setFormOpen(true)
+  }
+
+  function handleClose() {
+    setFormOpen(false)
+    setEditingPrayer(null)
+  }
 
   return (
     <div className="min-h-screen min-h-dvh flex flex-col bg-cream">
       <Header />
-      <PrayerBoard />
+      <PrayerBoard onEdit={handleEdit} />
 
       {/* FAB button */}
       <div className="sticky bottom-0 p-4 flex justify-center pointer-events-none">
@@ -21,7 +32,7 @@ export default function App() {
         </button>
       </div>
 
-      <PrayerForm open={formOpen} onClose={() => setFormOpen(false)} />
+      <PrayerForm open={formOpen} onClose={handleClose} editingPrayer={editingPrayer} />
     </div>
   )
 }

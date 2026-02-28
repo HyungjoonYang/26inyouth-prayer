@@ -5,6 +5,7 @@ import {
   addDoc,
   doc,
   updateDoc,
+  deleteDoc,
   increment,
   onSnapshot,
   query,
@@ -37,11 +38,12 @@ export function subscribeToPrayers(callback) {
   })
 }
 
-export async function addPrayer({ name, content, color }) {
+export async function addPrayer({ name, content, color, deviceId }) {
   return addDoc(prayersRef, {
     name: name || '',
     content,
     color,
+    deviceId: deviceId || '',
     prayCount: 0,
     createdAt: serverTimestamp(),
   })
@@ -52,4 +54,18 @@ export async function incrementPrayCount(docId) {
   return updateDoc(docRef, {
     prayCount: increment(1),
   })
+}
+
+export async function updatePrayer(docId, { name, content, color }) {
+  const docRef = doc(db, 'prayers', docId)
+  return updateDoc(docRef, {
+    name: name || '',
+    content,
+    color,
+  })
+}
+
+export async function deletePrayer(docId) {
+  const docRef = doc(db, 'prayers', docId)
+  return deleteDoc(docRef)
 }

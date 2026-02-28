@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
-import { incrementPrayCount } from '../firebase'
+import { incrementPrayCount, deletePrayer } from '../firebase'
+import { getDeviceId, hasPrayed, markPrayed } from '../utils/deviceId'
 
 const COLOR_MAP = {
   pink: 'bg-pastel-pink',
@@ -15,8 +16,9 @@ function formatDate(timestamp) {
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
-export default function PrayerCard({ prayer, index }) {
+export default function PrayerCard({ prayer, index, onEdit }) {
   const [bouncing, setBouncing] = useState(false)
+  const [prayed, setPrayed] = useState(() => hasPrayed(prayer.id))
 
   const rotation = useMemo(() => {
     const seed = prayer.id.charCodeAt(0) + (prayer.id.charCodeAt(1) || 0)
@@ -24,11 +26,20 @@ export default function PrayerCard({ prayer, index }) {
   }, [prayer.id])
 
   const bgClass = COLOR_MAP[prayer.color] || 'bg-pastel-yellow'
+  const isOwn = prayer.deviceId === getDeviceId()
 
   async function handlePray() {
+    if (prayed) return
     setBouncing(true)
+    setPrayed(true)
+    markPrayed(prayer.id)
     await incrementPrayCount(prayer.id)
     setTimeout(() => setBouncing(false), 300)
+  }
+
+  async function handleDelete() {
+    if (!confirm('이 기도제목을 삭제할까요?')) return
+    await deletePrayer(prayer.id)
   }
 
   return (
@@ -46,15 +57,38 @@ export default function PrayerCard({ prayer, index }) {
         {prayer.content}
       </p>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-400">
-          {formatDate(prayer.createdAt)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400">
+            {formatDate(prayer.createdAt)}
+          </span>
+          {isOwn && (
+            <>
+              <button
+                onClick={() => onEdit(prayer)}
+                className="text-xs text-gray-400 hover:text-amber-500 transition-colors cursor-pointer"
+              >
+                수정
+              </button>
+              <button
+                onClick={handleDelete}
+                className="text-xs text-gray-400 hover:text-red-400 transition-colors cursor-pointer"
+              >
+                삭제
+              </button>
+            </>
+          )}
+        </div>
         <button
           onClick={handlePray}
-          className={`flex items-center gap-1 text-sm px-2 py-1 rounded-full bg-white/50 hover:bg-white/80 active:scale-95 transition-all cursor-pointer ${bouncing ? 'animate-bounce-small' : ''}`}
+          disabled={prayed}
+          className={`flex items-center gap-1 text-sm px-2 py-1 rounded-full transition-all ${
+            prayed
+              ? 'bg-amber-100 text-amber-600 cursor-default'
+              : 'bg-white/50 hover:bg-white/80 active:scale-95 cursor-pointer'
+          } ${bouncing ? 'animate-bounce-small' : ''}`}
         >
-          <span>🙏</span>
-          <span className="text-gray-600 font-medium">{prayer.prayCount || 0}</span>
+          <span>{prayed ? '🙏' : '🤲'}</span>
+          <span className="font-medium">{prayer.prayCount || 0}</span>
         </button>
       </div>
     </div>
