@@ -27,7 +27,7 @@ const db = getFirestore(app)
 
 const prayersRef = collection(db, 'prayers')
 
-export function subscribeToPrayers(callback) {
+export function subscribeToPrayers(callback, onError) {
   const q = query(prayersRef, orderBy('createdAt', 'desc'))
   return onSnapshot(q, (snapshot) => {
     const prayers = snapshot.docs.map((doc) => ({
@@ -35,6 +35,9 @@ export function subscribeToPrayers(callback) {
       ...doc.data(),
     }))
     callback(prayers)
+  }, (error) => {
+    console.error('Failed to subscribe to prayers:', error)
+    if (onError) onError(error)
   })
 }
 
