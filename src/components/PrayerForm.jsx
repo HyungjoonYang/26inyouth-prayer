@@ -38,24 +38,29 @@ export default function PrayerForm({ open, onClose, editingPrayer }) {
 
     setSubmitting(true)
     try {
-      if (isEditing) {
-        await updatePrayer(editingPrayer.id, {
-          name: name.trim(),
-          content: content.trim(),
-          color,
-        })
-      } else {
-        await addPrayer({
-          name: name.trim(),
-          content: content.trim(),
-          color,
-          deviceId: getDeviceId(),
-        })
-      }
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 10000)
+      )
+
+      const write = isEditing
+        ? updatePrayer(editingPrayer.id, {
+            name: name.trim(),
+            content: content.trim(),
+            color,
+          })
+        : addPrayer({
+            name: name.trim(),
+            content: content.trim(),
+            color,
+            deviceId: getDeviceId(),
+          })
+
+      await Promise.race([write, timeout])
       resetForm()
       onClose()
     } catch (err) {
       console.error('Failed to save prayer:', err)
+      alert('저장에 실패했어요. 네트워크 연결을 확인하고 다시 시도해주세요.')
     } finally {
       setSubmitting(false)
     }
