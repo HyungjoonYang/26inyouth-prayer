@@ -72,3 +72,27 @@ export async function deletePrayer(docId) {
   const docRef = doc(db, 'prayers', docId)
   return deleteDoc(docRef)
 }
+
+export function subscribeToComments(prayerId, callback, onError) {
+  const commentsRef = collection(db, 'prayers', prayerId, 'comments')
+  const q = query(commentsRef, orderBy('createdAt', 'asc'))
+  return onSnapshot(q, (snapshot) => {
+    const comments = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }))
+    callback(comments)
+  }, (error) => {
+    console.error('Failed to subscribe to comments:', error)
+    if (onError) onError(error)
+  })
+}
+
+export async function addComment(prayerId, { name, content }) {
+  const commentsRef = collection(db, 'prayers', prayerId, 'comments')
+  return addDoc(commentsRef, {
+    name: name || '',
+    content,
+    createdAt: serverTimestamp(),
+  })
+}
