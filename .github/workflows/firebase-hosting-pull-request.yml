@@ -2,13 +2,16 @@
 # https://github.com/firebase/firebase-tools
 
 name: Deploy to Firebase Hosting on PR
-on: pull_request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
 permissions:
   checks: write
   contents: read
   pull-requests: write
 jobs:
   test:
+    if: ${{ github.event.action != 'labeled' || github.event.label.name == 'run test' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,6 +21,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - name: Remove run test label
+        if: ${{ github.event.action == 'labeled' && github.event.label.name == 'run test' }}
+        run: gh pr edit ${{ github.event.pull_request.number }} --remove-label "run test"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build_and_preview:
     needs: test
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
