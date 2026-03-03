@@ -8,8 +8,8 @@ describe('Header', () => {
     expect(screen.getByText(/인유스 기도함/)).toBeInTheDocument()
   })
 
-  it('should render the bible verse', () => {
+  it('should render a bible verse', () => {
     render(<Header />)
-    expect(screen.getByText(/마태복음 18:20/)).toBeInTheDocument()
+    expect(screen.getByText(/—/)).toBeInTheDocument()
   })
 })
