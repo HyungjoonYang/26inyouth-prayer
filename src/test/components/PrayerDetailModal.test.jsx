@@ -8,6 +8,11 @@ vi.mock('../../firebase', () => ({
   addComment: vi.fn(() => Promise.resolve()),
 }))
 
+vi.mock('../../utils/deviceId', () => ({
+  getSavedName: vi.fn(() => ''),
+  saveName: vi.fn(),
+}))
+
 import { subscribeToComments, addComment } from '../../firebase'
 
 const basePrayer = {

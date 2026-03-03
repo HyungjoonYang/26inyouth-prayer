@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { subscribeToComments, addComment } from '../firebase'
+import { getSavedName, saveName } from '../utils/deviceId'
 
 const COLOR_MAP = {
   pink: 'bg-pastel-pink',
@@ -17,7 +18,7 @@ function formatDate(timestamp) {
 
 export default function PrayerDetailModal({ prayer, open, onClose }) {
   const [comments, setComments] = useState([])
-  const [name, setName] = useState('')
+  const [name, setName] = useState(getSavedName)
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const commentsEndRef = useRef(null)
@@ -45,6 +46,7 @@ export default function PrayerDetailModal({ prayer, open, onClose }) {
         setTimeout(() => reject(new Error('timeout')), 10000)
       )
       await Promise.race([addComment(prayer.id, { name: name.trim(), content: content.trim() }), timeout])
+      saveName(name.trim())
       setContent('')
     } catch (err) {
       console.error('Failed to add comment:', err)

@@ -1,5 +1,6 @@
 const DEVICE_KEY = 'inyouth-device-id'
 const PRAYED_KEY = 'inyouth-prayed'
+const USERNAME_KEY = 'inyouth-username'
 
 export function getDeviceId() {
   let id = localStorage.getItem(DEVICE_KEY)
@@ -20,5 +21,17 @@ export function markPrayed(prayerId) {
   if (!list.includes(prayerId)) {
     list.push(prayerId)
     localStorage.setItem(PRAYED_KEY, JSON.stringify(list))
+  }
+}
+
+export function getSavedName() {
+  return localStorage.getItem(USERNAME_KEY) || ''
+}
+
+export function saveName(name) {
+  if (name) {
+    localStorage.setItem(USERNAME_KEY, name)
+  } else {
+    localStorage.removeItem(USERNAME_KEY)
   }
 }
