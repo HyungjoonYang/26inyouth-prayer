@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { subscribeToPrayers } from '../firebase'
+import { getDeviceId, getSavedName, saveName } from '../utils/deviceId'
 import PrayerCard from './PrayerCard'
 
 export default function PrayerBoard({ onEdit, onCardClick }) {
@@ -7,12 +8,18 @@ export default function PrayerBoard({ onEdit, onCardClick }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [retryKey, setRetryKey] = useState(0)
+  const nameRecovered = useRef(false)
 
   useEffect(() => {
     setLoading(true)
     setError(false)
     const unsubscribe = subscribeToPrayers(
       (data) => {
+        if (!nameRecovered.current && !getSavedName()) {
+          const myPrayer = data.find((p) => p.deviceId === getDeviceId() && p.name)
+          if (myPrayer) saveName(myPrayer.name)
+          nameRecovered.current = true
+        }
         setPrayers(data)
         setLoading(false)
         setError(false)

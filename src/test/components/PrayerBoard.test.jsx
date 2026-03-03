@@ -7,6 +7,12 @@ vi.mock('../../firebase', () => ({
   subscribeToPrayers: vi.fn(),
 }))
 
+vi.mock('../../utils/deviceId', () => ({
+  getDeviceId: vi.fn(() => 'test-device'),
+  getSavedName: vi.fn(() => ''),
+  saveName: vi.fn(),
+}))
+
 vi.mock('../../components/PrayerCard', () => ({
   default: ({ prayer }) => <div data-testid={`prayer-${prayer.id}`}>{prayer.content}</div>,
 }))
