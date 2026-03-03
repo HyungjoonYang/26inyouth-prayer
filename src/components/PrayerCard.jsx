@@ -79,18 +79,26 @@ export default function PrayerCard({ prayer, index, onEdit, onClick }) {
             </>
           )}
         </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); handlePray() }}
-          disabled={prayed}
-          className={`flex items-center gap-1 text-sm px-2 py-1 rounded-full transition-all ${
-            prayed
-              ? 'bg-amber-100 text-amber-600 cursor-default'
-              : 'bg-white/50 hover:bg-white/80 active:scale-95 cursor-pointer'
-          } ${bouncing ? 'animate-bounce-small' : ''}`}
-        >
-          <span>{prayed ? '🙏' : '🤲'}</span>
-          <span className="font-medium">{prayer.prayCount || 0}</span>
-        </button>
+        <div className="flex items-center gap-1.5">
+          {(prayer.commentCount || 0) > 0 && (
+            <span className="flex items-center gap-0.5 text-sm px-2 py-1 rounded-full bg-white/50 text-gray-500">
+              <span>💬</span>
+              <span className="font-medium">{prayer.commentCount}</span>
+            </span>
+          )}
+          <button
+            onClick={(e) => { e.stopPropagation(); handlePray() }}
+            disabled={prayed}
+            className={`flex items-center gap-1 text-sm px-2 py-1 rounded-full transition-all ${
+              prayed
+                ? 'bg-amber-100 text-amber-600 cursor-default'
+                : 'bg-white/50 hover:bg-white/80 active:scale-95 cursor-pointer'
+            } ${bouncing ? 'animate-bounce-small' : ''}`}
+          >
+            <span>{prayed ? '🙏' : '🤲'}</span>
+            <span className="font-medium">{prayer.prayCount || 0}</span>
+          </button>
+        </div>
       </div>
     </div>
   )

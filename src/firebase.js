@@ -90,9 +90,12 @@ export function subscribeToComments(prayerId, callback, onError) {
 
 export async function addComment(prayerId, { name, content }) {
   const commentsRef = collection(db, 'prayers', prayerId, 'comments')
-  return addDoc(commentsRef, {
+  const result = await addDoc(commentsRef, {
     name: name || '',
     content,
     createdAt: serverTimestamp(),
   })
+  const prayerDocRef = doc(db, 'prayers', prayerId)
+  await updateDoc(prayerDocRef, { commentCount: increment(1) })
+  return result
 }
