@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { addPrayer, updatePrayer } from '../firebase'
-import { getDeviceId } from '../utils/deviceId'
+import { getDeviceId, getSavedName, saveName } from '../utils/deviceId'
 
 const COLORS = [
   { key: 'pink', bg: 'bg-pastel-pink', label: '🩷' },
@@ -10,10 +10,14 @@ const COLORS = [
   { key: 'blue', bg: 'bg-pastel-blue', label: '💙' },
 ]
 
+function randomColor() {
+  return COLORS[Math.floor(Math.random() * COLORS.length)].key
+}
+
 export default function PrayerForm({ open, onClose, editingPrayer }) {
-  const [name, setName] = useState('')
+  const [name, setName] = useState(getSavedName)
   const [content, setContent] = useState('')
-  const [color, setColor] = useState('yellow')
+  const [color, setColor] = useState(randomColor)
   const [submitting, setSubmitting] = useState(false)
 
   const isEditing = !!editingPrayer
@@ -27,9 +31,9 @@ export default function PrayerForm({ open, onClose, editingPrayer }) {
   }, [editingPrayer])
 
   function resetForm() {
-    setName('')
+    setName(getSavedName())
     setContent('')
-    setColor('yellow')
+    setColor(randomColor())
   }
 
   async function handleSubmit(e) {
@@ -56,6 +60,7 @@ export default function PrayerForm({ open, onClose, editingPrayer }) {
           })
 
       await Promise.race([write, timeout])
+      saveName(name.trim())
       resetForm()
       onClose()
     } catch (err) {

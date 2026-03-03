@@ -10,6 +10,8 @@ vi.mock('../../firebase', () => ({
 
 vi.mock('../../utils/deviceId', () => ({
   getDeviceId: vi.fn(() => 'test-device'),
+  getSavedName: vi.fn(() => ''),
+  saveName: vi.fn(),
 }))
 
 import { addPrayer, updatePrayer } from '../../firebase'
@@ -55,7 +57,7 @@ describe('PrayerForm', () => {
     expect(addPrayer).toHaveBeenCalledWith({
       name: '홍길동',
       content: '기도합니다',
-      color: 'yellow',
+      color: expect.any(String),
       deviceId: 'test-device',
     })
     expect(onClose).toHaveBeenCalled()
