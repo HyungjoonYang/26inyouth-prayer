@@ -22,6 +22,7 @@ export default function PrayerDetailModal({ prayer, open, onClose }) {
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const commentsEndRef = useRef(null)
+  const sheetRef = useRef(null)
 
   useEffect(() => {
     if (!prayer) return
@@ -29,6 +30,29 @@ export default function PrayerDetailModal({ prayer, open, onClose }) {
     const unsubscribe = subscribeToComments(prayer.id, setComments)
     return unsubscribe
   }, [prayer?.id])
+
+  // 모바일 키보드 팝업 시 바텀시트 위치 조정
+  useEffect(() => {
+    if (!open) return
+    const viewport = window.visualViewport
+    if (!viewport) return
+
+    function handleResize() {
+      if (!sheetRef.current) return
+      const offsetBottom = window.innerHeight - viewport.height - viewport.offsetTop
+      sheetRef.current.style.bottom = `${Math.max(0, offsetBottom)}px`
+    }
+
+    viewport.addEventListener('resize', handleResize)
+    viewport.addEventListener('scroll', handleResize)
+    return () => {
+      viewport.removeEventListener('resize', handleResize)
+      viewport.removeEventListener('scroll', handleResize)
+      if (sheetRef.current) {
+        sheetRef.current.style.bottom = '0px'
+      }
+    }
+  }, [open])
 
   useEffect(() => {
     if (commentsEndRef.current) {
@@ -68,6 +92,7 @@ export default function PrayerDetailModal({ prayer, open, onClose }) {
       />
 
       <div
+        ref={sheetRef}
         className={`fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out max-h-[85vh] flex flex-col ${open ? 'translate-y-0' : 'translate-y-full'}`}
       >
         <div className="p-5 max-w-lg mx-auto w-full flex flex-col min-h-0 flex-1">
